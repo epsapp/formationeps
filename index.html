@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Course 12+30">
+<meta name="theme-color" content="#1a1a2e">
+<meta name="description" content="Épreuve finale de course 12 minutes + 30/30 pour EPS">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/icon-96x96.png">
+<title>Course 12' + 30/30</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+:root {
+  --bg: #0f0f1a;
+  --bg2: #1a1a2e;
+  --bg3: #252540;
+  --text: #e8e8f0;
+  --text-dim: #8888aa;
+  --accent: #00d4aa;
+  --accent2: #00b894;
+  --danger: #ff6b6b;
+  --warning: #ffd93d;
+  --orange: #ff8c42;
+  --green: #00d4aa;
+  --yellow: #ffd93d;
+  --blue: #4dabf7;
+  --radius: 12px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html, body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.screen { display:none; min-height:100vh; min-height:100dvh; padding:12px; padding-bottom:40px; }
+.screen.active { display:block; }
+
+/* HEADER */
+.app-header { text-align:center; padding:16px 0 8px; }
+.app-header h1 {
+  font-size:1.5rem; font-weight:800;
+  background:linear-gradient(135deg,var(--accent),var(--blue));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.app-header p { color:var(--text-dim); font-size:0.82rem; margin-top:2px; }
+
+/* CARDS */
+.card {
+  background:var(--bg2); border-radius:var(--radius);
+  padding:14px; margin-bottom:10px;
+  border:1px solid rgba(255,255,255,0.06);
+}
+.card-title {
+  font-size:0.72rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:1.5px; color:var(--accent); margin-bottom:8px;
+}
+
+/* INPUTS */
+.form-group { margin-bottom:10px; }
+.form-group label { display:block; font-size:0.78rem; color:var(--text-dim); margin-bottom:3px; font-weight:500; }
+.form-group input, .form-group select {
+  width:100%; padding:9px 11px; background:var(--bg3);
+  border:1px solid rgba(255,255,255,0.1); border-radius:8px;
+  color:var(--text); font-family:'Outfit',sans-serif; font-size:1rem; outline:none;
+}
+.form-group input:focus, .form-group select:focus { border-color:var(--accent); }
+.row { display:flex; gap:8px; }
+.row > * { flex:1; }
+
+/* BUTTONS */
+.btn {
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  padding:12px 20px; border:none; border-radius:10px;
+  font-family:'Outfit',sans-serif; font-size:1rem; font-weight:600;
+  cursor:pointer; transition:all 0.12s; width:100%;
+  -webkit-tap-highlight-color:transparent;
+}
+.btn:active { transform:scale(0.96); }
+.btn-primary { background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#000; }
+.btn-danger { background:var(--danger); color:#fff; }
+.btn-secondary { background:var(--bg3); color:var(--text); border:1px solid rgba(255,255,255,0.1); }
+.btn-large { padding:15px; font-size:1.1rem; }
+.btn:disabled { opacity:0.35; pointer-events:none; }
+
+/* ALLURE */
+.allure-options { display:flex; gap:6px; margin-bottom:10px; }
+.allure-opt {
+  flex:1; padding:8px 4px; border-radius:10px; text-align:center;
+  cursor:pointer; border:2px solid transparent; transition:all 0.2s;
+  font-size:0.75rem; font-weight:600;
+}
+.allure-opt.green { background:rgba(0,212,170,0.12); color:var(--green); }
+.allure-opt.green.selected { border-color:var(--green); background:rgba(0,212,170,0.25); }
+.allure-opt.yellow { background:rgba(255,217,61,0.12); color:var(--yellow); }
+.allure-opt.yellow.selected { border-color:var(--yellow); background:rgba(255,217,61,0.25); }
+.allure-opt.orange { background:rgba(255,140,66,0.12); color:var(--orange); }
+.allure-opt.orange.selected { border-color:var(--orange); background:rgba(255,140,66,0.25); }
+.allure-opt small { display:block; font-size:0.62rem; font-weight:400; margin-top:2px; opacity:0.8; }
+
+/* TIMER */
+.timer-zone { text-align:center; padding:12px 0; }
+.timer-display {
+  font-family:'JetBrains Mono',monospace; font-size:3.2rem;
+  font-weight:700; letter-spacing:2px; color:var(--text);
+}
+.timer-label { font-size:0.82rem; color:var(--text-dim); margin-bottom:2px; }
+.phase-indicator {
+  display:inline-block; padding:4px 14px; border-radius:20px;
+  font-size:0.78rem; font-weight:700; margin-top:6px;
+}
+.phase-run { background:rgba(0,212,170,0.2); color:var(--green); }
+.phase-rest { background:rgba(77,171,247,0.2); color:var(--blue); }
+.phase-walk { background:rgba(255,107,107,0.2); color:var(--danger); }
+
+/* COLUMN BAR */
+.column-bar { display:flex; gap:4px; margin:8px 0; justify-content:center; }
+.col-block {
+  width:34px; height:34px; border-radius:6px;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'JetBrains Mono',monospace; font-size:0.72rem; font-weight:700;
+  background:var(--bg3); color:var(--text-dim);
+  border:1px solid rgba(255,255,255,0.08); transition:all 0.3s;
+}
+.col-block.active { background:var(--accent); color:#000; box-shadow:0 0 12px rgba(0,212,170,0.4); }
+.col-block.done { background:rgba(0,212,170,0.2); color:var(--accent); }
+.col-block.skipped { background:rgba(255,107,107,0.12); color:var(--danger); text-decoration:line-through; }
+
+/* PLOT COUNT */
+.plot-count {
+  font-family:'JetBrains Mono',monospace; font-size:2.2rem;
+  font-weight:700; min-width:60px; text-align:center;
+}
+
+/* SPEED FEEDBACK */
+.speed-feedback {
+  text-align:center; padding:8px; border-radius:10px;
+  font-weight:700; font-size:0.95rem; margin:6px 0; transition:all 0.3s;
+}
+.speed-ok { background:rgba(0,212,170,0.12); color:var(--green); }
+.speed-slow { background:rgba(255,107,107,0.12); color:var(--danger); }
+.speed-fast { background:rgba(77,171,247,0.12); color:var(--blue); }
+
+/* ACTION ROW */
+.action-row { display:flex; gap:8px; margin:6px 0; }
+.action-row .btn { flex:1; }
+
+/* BIG PLOT BTN */
+.btn-plot {
+  background:linear-gradient(135deg,#00d4aa,#00b894); color:#000;
+  font-size:1.25rem; padding:18px; border-radius:14px; font-weight:800;
+  box-shadow:0 4px 20px rgba(0,212,170,0.25);
+}
+.btn-plot:active { transform:scale(0.94); }
+.btn-walk { background:var(--danger); color:#fff; font-size:0.95rem; padding:13px; }
+
+/* GRID TABLE */
+.grid-table {
+  width:100%; border-collapse:collapse; margin:6px 0;
+  font-family:'JetBrains Mono',monospace; font-size:0.65rem;
+}
+.grid-table th, .grid-table td {
+  border:1px solid rgba(255,255,255,0.07); padding:2px;
+  text-align:center; min-width:26px; height:20px;
+}
+.grid-table th { background:var(--bg3); color:var(--text-dim); font-weight:600; font-size:0.6rem; }
+.grid-table td.marked { background:var(--accent); color:#000; font-weight:700; }
+.grid-table td.col-active-cell { background:rgba(0,212,170,0.06); }
+
+/* REP GRID (30/30) */
+.rep-grid { display:flex; gap:5px; flex-wrap:wrap; margin:8px 0; justify-content:center; }
+.rep-item {
+  width:42px; height:42px; border-radius:8px;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'JetBrains Mono',monospace; font-size:0.82rem; font-weight:700;
+  background:var(--bg3); color:var(--text-dim); border:1px solid rgba(255,255,255,0.06);
+}
+.rep-item.current { background:var(--accent); color:#000; box-shadow:0 0 10px rgba(0,212,170,0.4); }
+.rep-item.done-ok { background:rgba(0,212,170,0.2); color:var(--green); }
+.rep-item.done-fail { background:rgba(255,107,107,0.2); color:var(--danger); }
+.rep-item.rest { background:rgba(77,171,247,0.12); color:var(--blue); }
+
+/* RESULTS */
+.result-row {
+  display:flex; justify-content:space-between; padding:7px 0;
+  border-bottom:1px solid rgba(255,255,255,0.06); font-size:0.88rem;
+}
+.result-row .label { color:var(--text-dim); }
+.result-row .value { font-weight:700; font-family:'JetBrains Mono',monospace; }
+.big-score {
+  text-align:center; font-family:'JetBrains Mono',monospace;
+  font-size:2.8rem; font-weight:800; color:var(--accent); padding:12px 0;
+}
+
+/* SKIP COLS */
+.skip-cols { display:flex; gap:5px; flex-wrap:wrap; margin:6px 0; }
+.skip-col-btn {
+  padding:5px 10px; border-radius:8px;
+  border:2px solid rgba(255,255,255,0.1); background:var(--bg3);
+  color:var(--text); font-family:'JetBrains Mono',monospace;
+  font-size:0.78rem; cursor:pointer; transition:all 0.2s;
+}
+.skip-col-btn.selected { border-color:var(--danger); background:rgba(255,107,107,0.2); color:var(--danger); }
+
+/* MISC */
+.divider { height:1px; background:rgba(255,255,255,0.06); margin:10px 0; }
+.info-text { font-size:0.78rem; color:var(--text-dim); line-height:1.4; }
+.badge { display:inline-block; padding:2px 7px; border-radius:10px; font-size:0.68rem; font-weight:700; }
+.badge-green { background:rgba(0,212,170,0.2); color:var(--green); }
+.badge-red { background:rgba(255,107,107,0.2); color:var(--danger); }
+.hidden { display:none !important; }
+
+.recovery-banner {
+  background:rgba(77,171,247,0.12); border:1px solid rgba(77,171,247,0.25);
+  border-radius:10px; padding:10px; text-align:center;
+  color:var(--blue); font-weight:700; font-size:1rem; margin:6px 0;
+}
+
+/* Audio beep indicator */
+.beep-indicator {
+  position:fixed; top:0; left:0; right:0; height:4px;
+  background:var(--accent); opacity:0; transition:opacity 0.15s; z-index:999;
+}
+.beep-indicator.flash { opacity:1; }
+
+/* Install prompt */
+.install-prompt {
+  position:fixed; bottom:0; left:0; right:0;
+  background:var(--bg2); border-top:1px solid rgba(255,255,255,0.1);
+  padding:12px 16px; display:flex; align-items:center; justify-content:space-between;
+  gap:10px; z-index:200;
+}
+.install-prompt .btn { width:auto; padding:8px 16px; font-size:0.85rem; }
+
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
+.pulsing { animation:pulse 1s infinite; }
+
+@media(min-width:600px) { .screen { max-width:500px; margin:0 auto; } }
+</style>
+</head>
+<body>
+
+<div class="beep-indicator" id="beep-flash"></div>
+
+<!-- ====== SCREEN: CONFIG ====== -->
+<div id="screen-config" class="screen active">
+  <div class="app-header">
+    <h1>🏃 Course 12' + 30/30</h1>
+    <p>Épreuve finale — Paramétrage</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">⚙️ Paramètres piste</div>
+    <div class="row">
+      <div class="form-group">
+        <label>Distance entre plots (m)</label>
+        <input type="number" id="cfg-plot-dist" value="20" min="5" max="100" step="5">
+      </div>
+      <div class="form-group">
+        <label>Longueur piste (m)</label>
+        <input type="number" id="cfg-track-length" value="200" min="50" max="500" step="10">
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="card-c1">
+    <div class="card-title">👤 Coureur 1</div>
+    <div class="form-group">
+      <label>Nom</label>
+      <input type="text" id="c1-name" placeholder="Prénom Nom">
+    </div>
+    <div class="row">
+      <div class="form-group">
+        <label>VMA (km/h)</label>
+        <select id="c1-vma">
+          <option value="8">8</option><option value="9">9</option>
+          <option value="10">10</option><option value="11">11</option>
+          <option value="12" selected>12</option><option value="13">13</option>
+          <option value="14">14</option><option value="15">15</option>
+          <option value="16">16</option><option value="17">17</option>
+          <option value="18">18</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Sexe</label>
+        <select id="c1-gender">
+          <option value="F">Fille</option><option value="G">Garçon</option>
+        </select>
+      </div>
+    </div>
+    <label style="font-size:0.78rem;color:var(--text-dim);margin-bottom:5px;display:block;">Allure choisie :</label>
+    <div class="allure-options">
+      <div class="allure-opt green selected" data-runner="1" data-allure="green" onclick="selectAllure(1,'green')">
+        🟢 Verte<small>VMA-3 · 12' continu</small>
+      </div>
+      <div class="allure-opt yellow" data-runner="1" data-allure="yellow" onclick="selectAllure(1,'yellow')">
+        🟡 Jaune<small>VMA-2 · -1 col</small>
+      </div>
+      <div class="allure-opt orange" data-runner="1" data-allure="orange" onclick="selectAllure(1,'orange')">
+        🟠 Orange<small>VMA-1 · -2 col</small>
+      </div>
+    </div>
+    <div id="c1-skip-zone" class="hidden">
+      <label style="font-size:0.78rem;color:var(--text-dim);margin-bottom:5px;display:block;">Colonnes à rayer (cliquer) :</label>
+      <div class="skip-cols" id="c1-skip-cols"></div>
+    </div>
+  </div>
+
+  <div class="card" id="card-c2">
+    <div class="card-title">👤 Coureur 2</div>
+    <div class="form-group">
+      <label>Nom</label>
+      <input type="text" id="c2-name" placeholder="Prénom Nom">
+    </div>
+    <div class="row">
+      <div class="form-group">
+        <label>VMA (km/h)</label>
+        <select id="c2-vma">
+          <option value="8">8</option><option value="9">9</option>
+          <option value="10">10</option><option value="11">11</option>
+          <option value="12" selected>12</option><option value="13">13</option>
+          <option value="14">14</option><option value="15">15</option>
+          <option value="16">16</option><option value="17">17</option>
+          <option value="18">18</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Sexe</label>
+        <select id="c2-gender">
+          <option value="F">Fille</option><option value="G">Garçon</option>
+        </select>
+      </div>
+    </div>
+    <label style="font-size:0.78rem;color:var(--text-dim);margin-bottom:5px;display:block;">Allure choisie :</label>
+    <div class="allure-options">
+      <div class="allure-opt green selected" data-runner="2" data-allure="green" onclick="selectAllure(2,'green')">
+        🟢 Verte<small>VMA-3 · 12' continu</small>
+      </div>
+      <div class="allure-opt yellow" data-runner="2" data-allure="yellow" onclick="selectAllure(2,'yellow')">
+        🟡 Jaune<small>VMA-2 · -1 col</small>
+      </div>
+      <div class="allure-opt orange" data-runner="2" data-allure="orange" onclick="selectAllure(2,'orange')">
+        🟠 Orange<small>VMA-1 · -2 col</small>
+      </div>
+    </div>
+    <div id="c2-skip-zone" class="hidden">
+      <label style="font-size:0.78rem;color:var(--text-dim);margin-bottom:5px;display:block;">Colonnes à rayer (cliquer) :</label>
+      <div class="skip-cols" id="c2-skip-cols"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔁 Séries 30/30</div>
+    <div class="form-group">
+      <label>Nombre de répétitions (4 à 7)</label>
+      <select id="cfg-reps">
+        <option value="4">4</option><option value="5">5</option>
+        <option value="6" selected>6</option><option value="7">7</option>
+      </select>
+    </div>
+  </div>
+
+  <button class="btn btn-primary btn-large" onclick="startRace(1)" style="margin-top:10px;">
+    ▶️ Coureur 1 court en premier
+  </button>
+  <button class="btn btn-secondary btn-large" onclick="startRace(2)" style="margin-top:6px;">
+    ▶️ Coureur 2 court en premier
+  </button>
+</div>
+
+<!-- ====== SCREEN: 12 MIN ====== -->
+<div id="screen-12min" class="screen">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+    <div>
+      <div style="font-size:0.72rem;color:var(--text-dim);">COUREUR</div>
+      <div id="r12-runner-name" style="font-size:1.05rem;font-weight:700;"></div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:0.72rem;color:var(--text-dim);">CIBLE</div>
+      <div id="r12-target-speed" style="font-size:1.05rem;font-weight:700;font-family:'JetBrains Mono',monospace;"></div>
+    </div>
+  </div>
+
+  <div class="timer-zone">
+    <div class="timer-label">TEMPS ÉCOULÉ</div>
+    <div class="timer-display" id="r12-timer">00:00</div>
+    <div id="r12-phase" class="phase-indicator phase-run">🏃 COURSE</div>
+  </div>
+
+  <div style="text-align:center;font-size:0.72rem;color:var(--text-dim);margin-top:2px;">COLONNES (1'30" chacune)</div>
+  <div class="column-bar" id="r12-columns"></div>
+
+  <div class="speed-feedback hidden" id="r12-feedback"></div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div style="font-size:0.68rem;color:var(--text-dim);">PLOTS COLONNE</div>
+        <div id="r12-plot-count" class="plot-count">0</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:0.68rem;color:var(--text-dim);">TEMPS COLONNE</div>
+        <div id="r12-col-time" style="font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:700;color:var(--text);">0:00</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:0.68rem;color:var(--text-dim);">CIBLE / 1'30"</div>
+        <div id="r12-plot-target" style="font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:700;color:var(--accent);"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="r12-recovery-banner" class="recovery-banner hidden">
+    ⏸️ RÉCUPÉRATION — Colonne rayée
+  </div>
+
+  <button class="btn btn-plot" id="r12-btn-plot" onclick="recordPlot12()">
+    📍 PASSAGE PLOT
+  </button>
+
+  <div class="action-row" style="margin-top:6px;">
+    <button class="btn btn-walk btn-danger" id="r12-btn-walk" onclick="recordWalk12()">
+      🚶 MARCHE / ARRÊT
+    </button>
+    <button class="btn btn-secondary" onclick="stop12Confirm()" style="font-size:0.85rem;">
+      ⏹️ Terminer
+    </button>
+  </div>
+
+  <div class="divider"></div>
+  <div style="overflow-x:auto;"><table class="grid-table" id="r12-grid"></table></div>
+  <div class="divider"></div>
+  <div style="display:flex;justify-content:space-between;font-size:0.82rem;">
+    <span>Sorties : <strong id="r12-sorties">0</strong></span>
+    <span>Pénalités marche : <strong id="r12-penalties">0</strong></span>
+  </div>
+</div>
+
+<!-- ====== SCREEN: TRANSITION ====== -->
+<div id="screen-transition" class="screen">
+  <div class="app-header">
+    <h1>⏸️ Transition</h1>
+  </div>
+  <div class="card" style="text-align:center;">
+    <div style="font-size:1rem;margin-bottom:10px;line-height:1.4;" id="trans-text"></div>
+    <p class="info-text">Temps de récupération avant les 30/30</p>
+  </div>
+  <button class="btn btn-primary btn-large" onclick="startPhase2()" style="margin-top:10px;">
+    ▶️ Démarrer les 30/30
+  </button>
+</div>
+
+<!-- ====== SCREEN: 30/30 ====== -->
+<div id="screen-3030" class="screen">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+    <div>
+      <div style="font-size:0.72rem;color:var(--text-dim);">COUREUR</div>
+      <div id="r30-runner-name" style="font-size:1.05rem;font-weight:700;"></div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:0.72rem;color:var(--text-dim);">CONTRAT</div>
+      <div id="r30-target-plots" style="font-size:1.05rem;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--accent);"></div>
+    </div>
+  </div>
+
+  <div class="timer-zone">
+    <div class="timer-label" id="r30-timer-label">30/30 — COURSE</div>
+    <div class="timer-display" id="r30-timer">00:30</div>
+    <div id="r30-phase" class="phase-indicator phase-run">🏃 COURSE</div>
+  </div>
+
+  <div style="text-align:center;font-size:0.72rem;color:var(--text-dim);margin-top:2px;">RÉPÉTITIONS</div>
+  <div class="rep-grid" id="r30-reps"></div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div style="font-size:0.68rem;color:var(--text-dim);">PLOTS RÉP.</div>
+        <div id="r30-plot-count" class="plot-count">0</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:0.68rem;color:var(--text-dim);">CONTRAT EN 30"</div>
+        <div id="r30-contract" style="font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:700;color:var(--accent);"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="speed-feedback hidden" id="r30-feedback"></div>
+
+  <button class="btn btn-plot" id="r30-btn-plot" onclick="recordPlot30()">
+    📍 PASSAGE PLOT
+  </button>
+  <div class="action-row" style="margin-top:6px;">
+    <button class="btn btn-walk btn-danger" id="r30-btn-walk" onclick="recordWalk30()">
+      🚶 MARCHE / ARRÊT
+    </button>
+  </div>
+
+  <div class="divider"></div>
+  <div id="r30-summary"></div>
+</div>
+
+<!-- ====== SCREEN: RESULTS ====== -->
+<div id="screen-results" class="screen">
+  <div class="app-header">
+    <h1>📊 Résultats</h1>
+    <p id="res-runner-name"></p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Partie 1 — Course 12'</div>
+    <div class="result-row"><span class="label">Allure</span><span class="value" id="res-allure"></span></div>
+    <div class="result-row"><span class="label">Vitesse cible</span><span class="value" id="res-speed"></span></div>
+    <div class="result-row"><span class="label">Plots total (12')</span><span class="value" id="res-plots-total"></span></div>
+    <div class="result-row"><span class="label">Sorties de route</span><span class="value" id="res-sorties"></span></div>
+    <div class="result-row"><span class="label">Pénalités marche</span><span class="value" id="res-penalties"></span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Partie 2 — 30/30</div>
+    <div class="result-row"><span class="label">Contrat</span><span class="value" id="res-contract-30"></span></div>
+    <div class="result-row"><span class="label">Rép. réussies</span><span class="value" id="res-reps-ok"></span></div>
+    <div class="result-row"><span class="label">Sorties 30/30</span><span class="value" id="res-sorties-30"></span></div>
+    <div class="result-row"><span class="label">Rattrapages</span><span class="value" id="res-rattrapages"></span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Bilan</div>
+    <div class="result-row"><span class="label">Total sorties de route</span><span class="value" id="res-total-sorties"></span></div>
+    <div class="result-row"><span class="label">Domaine 1 — Régularité (/8)</span><span class="value" id="res-d1-reg"></span></div>
+    <div class="result-row"><span class="label">Domaine 1 — VMA (/4)</span><span class="value" id="res-d1-vma"></span></div>
+    <div class="big-score" id="res-d1-total"></div>
+    <div style="text-align:center;font-size:0.85rem;color:var(--text-dim);">TOTAL DOMAINE 1 / 12</div>
+  </div>
+
+  <button class="btn btn-primary btn-large" id="res-next-btn" onclick="nextRunner()" style="margin-top:10px;"></button>
+  <button class="btn btn-secondary btn-large" onclick="showFinalScreen()" id="res-final-btn" class="hidden" style="margin-top:6px;">
+    📊 Voir résultats finaux
+  </button>
+  <button class="btn btn-secondary btn-large" onclick="resetApp()" style="margin-top:6px;">🔄 Recommencer</button>
+</div>
+
+<!-- ====== SCREEN: FINAL ====== -->
+<div id="screen-final" class="screen">
+  <div class="app-header">
+    <h1>🏆 Résultats Finaux</h1>
+  </div>
+  <div id="final-results"></div>
+  <button class="btn btn-secondary btn-large" onclick="resetApp()" style="margin-top:14px;">🔄 Nouvelle épreuve</button>
+</div>
+
+
+<script>
+// =========================================
+// AUDIO - Beep sans fichier externe
+// =========================================
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+
+function ensureAudio() {
+  if (!audioCtx) audioCtx = new AudioCtx();
+}
+
+function beep(freq = 800, duration = 0.15, vol = 0.3) {
+  try {
+    ensureAudio();
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.connect(g); g.connect(audioCtx.destination);
+    o.frequency.value = freq;
+    g.gain.value = vol;
+    o.start(); o.stop(audioCtx.currentTime + duration);
+    // Visual flash
+    const fl = document.getElementById('beep-flash');
+    fl.classList.add('flash');
+    setTimeout(() => fl.classList.remove('flash'), 200);
+  } catch(e) {}
+}
+
+function beepColumn() { beep(600, 0.3, 0.4); setTimeout(() => beep(800, 0.2, 0.4), 350); }
+function beepEnd() { beep(500, 0.15, 0.4); setTimeout(() => beep(700, 0.15, 0.4), 200); setTimeout(() => beep(1000, 0.4, 0.5), 400); }
+function beep3030Start() { beep(1000, 0.25, 0.5); }
+function beep3030Rest() { beep(400, 0.4, 0.4); }
+function beepCountdown() { beep(600, 0.08, 0.2); }
+
+// =========================================
+// STATE
+// =========================================
+const S = {
+  plotDist: 20, trackLength: 200, reps3030: 6,
+  runners: [{}, {}],
+  currentIdx: 0,
+  order: [0,1],
+  completedRunners: 0,
+};
+
+// =========================================
+// ALLURE SELECTION
+// =========================================
+function selectAllure(runner, allure) {
+  document.querySelectorAll(`.allure-opt[data-runner="${runner}"]`).forEach(o => o.classList.remove('selected'));
+  document.querySelector(`.allure-opt[data-runner="${runner}"][data-allure="${allure}"]`).classList.add('selected');
+
+  const skipZone = document.getElementById(`c${runner}-skip-zone`);
+  const skipCols = document.getElementById(`c${runner}-skip-cols`);
+
+  if (allure === 'green') {
+    skipZone.classList.add('hidden');
+  } else {
+    skipZone.classList.remove('hidden');
+    const maxSkip = allure === 'yellow' ? 1 : 2;
+    skipCols.innerHTML = '';
+    for (let i = 1; i <= 8; i++) {
+      const btn = document.createElement('div');
+      btn.className = 'skip-col-btn';
+      btn.textContent = `${i}`;
+      btn.dataset.col = i;
+      btn.onclick = () => toggleSkipCol(runner, i, maxSkip);
+      skipCols.appendChild(btn);
+    }
+  }
+}
+
+function toggleSkipCol(runner, col, maxSkip) {
+  const container = document.getElementById(`c${runner}-skip-cols`);
+  const btn = container.querySelector(`[data-col="${col}"]`);
+  if (btn.classList.contains('selected')) { btn.classList.remove('selected'); }
+  else if (container.querySelectorAll('.selected').length < maxSkip) { btn.classList.add('selected'); }
+}
+
+function getSkippedCols(runner) {
+  const c = document.getElementById(`c${runner}-skip-cols`);
+  if (!c) return [];
+  return Array.from(c.querySelectorAll('.selected')).map(b => parseInt(b.dataset.col));
+}
+
+// =========================================
+// COMPUTE
+// =========================================
+function targetSpeed(vma, allure) {
+  return vma - ({green:3, yellow:2, orange:1}[allure] || 3);
+}
+
+function plotsPer90s(speed, plotDist) {
+  return (speed * 1000 / 3600) * 90 / plotDist;
+}
+
+function contract3030(vma) {
+  if (vma >= 18) return 6.5;
+  if (vma >= 16) return 6;
+  if (vma >= 14) return 5.5;
+  if (vma >= 12) return 5;
+  if (vma >= 10) return 4.5;
+  return 4;
+}
+
+function vmaScore(vma, g) {
+  const t = {
+    G:{18:4,17:4,16:4,15:3.5,14:3,13:2.5,12:2,11:1.5,10:1,9:0.5,8:0},
+    F:{18:4,17:4,16:4,15:4,14:4,13:3.5,12:3,11:2.5,10:2,9:1.5,8:1}
+  };
+  return t[g]?.[vma] ?? 0;
+}
+
+function sortiesScore(n) {
+  if (n <= 0) return 8;
+  if (n <= 7) return 8 - n;
+  return 0;
+}
+
+// =========================================
+// START
+// =========================================
+function startRace(first) {
+  ensureAudio(); // unlock audio on user gesture
+
+  S.plotDist = parseInt(document.getElementById('cfg-plot-dist').value) || 20;
+  S.trackLength = parseInt(document.getElementById('cfg-track-length').value) || 200;
+  S.reps3030 = parseInt(document.getElementById('cfg-reps').value) || 6;
+  S.order = first === 1 ? [0,1] : [1,0];
+
+  for (let i = 0; i < 2; i++) {
+    const ri = i+1;
+    const allureEl = document.querySelector(`.allure-opt[data-runner="${ri}"].selected`);
+    const allure = allureEl ? allureEl.dataset.allure : 'green';
+    const vma = parseInt(document.getElementById(`c${ri}-vma`).value);
+    const gender = document.getElementById(`c${ri}-gender`).value;
+
+    S.runners[i] = {
+      name: document.getElementById(`c${ri}-name`).value || `Coureur ${ri}`,
+      vma, gender, allure,
+      tSpeed: targetSpeed(vma, allure),
+      skippedCols: getSkippedCols(ri),
+      plotTarget90: 0,
+      contract30: contract3030(vma),
+      grid: Array.from({length:8}, () => 0),
+      walkPen12: Array.from({length:8}, () => false),
+      repsData: [],
+      walkPen30: [],
+      results: null,
+    };
+    S.runners[i].plotTarget90 = plotsPer90s(S.runners[i].tSpeed, S.plotDist);
+  }
+
+  S.completedRunners = 0;
+  S.currentIdx = S.order[0];
+  launch12();
+}
+
+// =========================================
+// 12 MINUTES
+// =========================================
+let t12 = null, elapsed12 = 0, col12 = 0, plotsCol = 0;
+
+function launch12() {
+  const r = S.runners[S.currentIdx];
+  showScreen('screen-12min');
+  document.getElementById('r12-runner-name').textContent = r.name;
+  document.getElementById('r12-target-speed').textContent = r.tSpeed + ' km/h';
+  document.getElementById('r12-plot-target').textContent = r.plotTarget90.toFixed(1);
+
+  elapsed12 = 0; col12 = 0; plotsCol = 0;
+  r.grid = Array.from({length:8}, () => 0);
+  r.walkPen12 = Array.from({length:8}, () => false);
+
+  renderColBar(); renderGrid12(); updateTimer12Display();
+  document.getElementById('r12-sorties').textContent = '0';
+  document.getElementById('r12-penalties').textContent = '0';
+  document.getElementById('r12-plot-count').textContent = '0';
+  document.getElementById('r12-col-time').textContent = '0:00';
+  document.getElementById('r12-feedback').classList.add('hidden');
+  updateColState();
+
+  t12 = setInterval(tick12, 1000);
+}
+
+function tick12() {
+  elapsed12++;
+  updateTimer12Display();
+
+  // Column time
+  const colTime = elapsed12 - col12 * 90;
+  const cm = Math.floor(colTime / 60), cs = colTime % 60;
+  document.getElementById('r12-col-time').textContent = cm + ':' + String(cs).padStart(2,'0');
+
+  // Countdown beep at 87, 88, 89
+  if (elapsed12 % 90 >= 87 && elapsed12 % 90 < 90 && elapsed12 < 720) beepCountdown();
+
+  // Column change
+  if (elapsed12 > 0 && elapsed12 % 90 === 0 && col12 < 7) {
+    finishCol12();
+    col12++;
+    plotsCol = 0;
+    document.getElementById('r12-plot-count').textContent = '0';
+    document.getElementById('r12-col-time').textContent = '0:00';
+    beepColumn();
+    updateColState();
+    renderColBar();
+    updateFeedback12();
+  }
+
+  // Update feedback continuously
+  if (elapsed12 % 5 === 0) updateFeedback12();
+
+  // End
+  if (elapsed12 >= 720) {
+    finishCol12();
+    clearInterval(t12); t12 = null;
+    beepEnd();
+    setTimeout(() => goTransition(), 500);
+  }
+}
+
+function updateTimer12Display() {
+  const m = Math.floor(elapsed12/60), s = elapsed12%60;
+  document.getElementById('r12-timer').textContent = String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
+
+function updateColState() {
+  const r = S.runners[S.currentIdx];
+  const skip = r.skippedCols.includes(col12+1);
+  document.getElementById('r12-recovery-banner').classList.toggle('hidden', !skip);
+  document.getElementById('r12-btn-plot').disabled = skip;
+  document.getElementById('r12-btn-walk').disabled = skip;
+  if (skip) {
+    document.getElementById('r12-phase').textContent = '⏸️ RÉCUPÉRATION';
+    document.getElementById('r12-phase').className = 'phase-indicator phase-rest';
+  } else {
+    document.getElementById('r12-phase').textContent = '🏃 COURSE';
+    document.getElementById('r12-phase').className = 'phase-indicator phase-run';
+  }
+}
+
+function renderColBar() {
+  const r = S.runners[S.currentIdx];
+  const c = document.getElementById('r12-columns');
+  c.innerHTML = '';
+  for (let i = 0; i < 8; i++) {
+    const d = document.createElement('div');
+    d.className = 'col-block';
+    if (r.skippedCols.includes(i+1)) { d.classList.add('skipped'); d.textContent = '✕'; }
+    else if (i < col12) { d.classList.add('done'); d.textContent = '✓'; }
+    else if (i === col12) { d.classList.add('active'); d.textContent = i+1; }
+    else d.textContent = i+1;
+    c.appendChild(d);
+  }
+}
+
+function renderGrid12() {
+  const r = S.runners[S.currentIdx];
+  const labels = ["1'30","3'","4'30","6'","7'30","9'","10'30","12'"];
+  let h = '<tr><th></th>';
+  for (let c = 0; c < 8; c++) {
+    const sk = r.skippedCols.includes(c+1);
+    h += `<th style="${sk?'text-decoration:line-through;color:var(--danger);':''}">${labels[c]}</th>`;
+  }
+  h += '</tr>';
+  for (let row = 18; row >= 1; row--) {
+    h += `<tr><td style="font-weight:600;font-size:0.6rem;">${row}</td>`;
+    for (let c = 0; c < 8; c++) {
+      const sk = r.skippedCols.includes(c+1);
+      if (sk) { h += '<td style="background:rgba(255,107,107,0.04);"></td>'; continue; }
+      const marked = r.grid[c] >= row;
+      const isActive = c === col12;
+      let cls = marked ? 'marked' : (isActive ? 'col-active-cell' : '');
+      h += `<td class="${cls}">${marked?'✕':''}</td>`;
+    }
+    h += '</tr>';
+  }
+  document.getElementById('r12-grid').innerHTML = h;
+}
+
+function recordPlot12() {
+  const r = S.runners[S.currentIdx];
+  if (r.skippedCols.includes(col12+1)) return;
+  plotsCol++;
+  r.grid[col12] = plotsCol;
+  document.getElementById('r12-plot-count').textContent = plotsCol;
+  beep(900, 0.06, 0.15);
+  renderGrid12();
+  updateFeedback12();
+}
+
+function recordWalk12() {
+  const r = S.runners[S.currentIdx];
+  if (r.skippedCols.includes(col12+1)) return;
+  r.walkPen12[col12] = true;
+  document.getElementById('r12-phase').textContent = '🚶 MARCHE';
+  document.getElementById('r12-phase').className = 'phase-indicator phase-walk';
+  beep(300, 0.2, 0.3);
+  setTimeout(() => {
+    if (!r.skippedCols.includes(col12+1)) {
+      document.getElementById('r12-phase').textContent = '🏃 COURSE';
+      document.getElementById('r12-phase').className = 'phase-indicator phase-run';
+    }
+  }, 2000);
+  updatePenCount12();
+}
+
+function updateFeedback12() {
+  const r = S.runners[S.currentIdx];
+  if (r.skippedCols.includes(col12+1)) { document.getElementById('r12-feedback').classList.add('hidden'); return; }
+  const target = r.plotTarget90;
+  const timeInCol = elapsed12 - col12 * 90;
+  if (timeInCol <= 3) { document.getElementById('r12-feedback').classList.add('hidden'); return; }
+  const expected = (timeInCol / 90) * target;
+  const diff = plotsCol - expected;
+  const fb = document.getElementById('r12-feedback');
+  fb.classList.remove('hidden');
+  if (diff > 0.8) { fb.className = 'speed-feedback speed-fast'; fb.textContent = '⚡ Trop rapide — ralentir !'; }
+  else if (diff < -0.8) { fb.className = 'speed-feedback speed-slow'; fb.textContent = '⚠️ Trop lent — accélérer !'; }
+  else { fb.className = 'speed-feedback speed-ok'; fb.textContent = '✅ Dans la cible !'; }
+}
+
+function finishCol12() { /* sorties computed in results */ }
+
+function updatePenCount12() {
+  const r = S.runners[S.currentIdx];
+  document.getElementById('r12-penalties').textContent = r.walkPen12.filter(Boolean).length;
+  calcSorties12();
+}
+
+function calcSorties12() {
+  const r = S.runners[S.currentIdx];
+  let s = 0;
+  const tgt = Math.floor(r.plotTarget90);
+  for (let c = 0; c < col12; c++) {
+    if (r.skippedCols.includes(c+1)) continue;
+    const deficit = tgt - r.grid[c];
+    if (deficit > 0) s += deficit;
+  }
+  document.getElementById('r12-sorties').textContent = s;
+}
+
+function stop12Confirm() {
+  if (confirm('Terminer les 12 minutes maintenant ?')) {
+    finishCol12();
+    clearInterval(t12); t12 = null;
+    beepEnd();
+    goTransition();
+  }
+}
+
+// =========================================
+// TRANSITION
+// =========================================
+function goTransition() {
+  showScreen('screen-transition');
+  const r = S.runners[S.currentIdx];
+  document.getElementById('trans-text').innerHTML =
+    `<strong>${r.name}</strong> a terminé les 12 minutes.<br>Préparez-vous pour les <strong>${S.reps3030}× 30/30</strong> à VMA.`;
+}
+
+function startPhase2() { launch3030(); }
+
+// =========================================
+// 30/30
+// =========================================
+let t30 = null, repIdx = 0, isRun = true, timeLeft = 30, plotsRep = 0;
+
+function launch3030() {
+  const r = S.runners[S.currentIdx];
+  showScreen('screen-3030');
+  document.getElementById('r30-runner-name').textContent = r.name;
+  document.getElementById('r30-target-plots').textContent = r.contract30 + ' plots / 30"';
+  document.getElementById('r30-contract').textContent = r.contract30.toString();
+
+  r.repsData = [];
+  r.walkPen30 = [];
+  repIdx = 0; isRun = true; timeLeft = 30; plotsRep = 0;
+
+  buildReps(); updateUI30(); update30Timer();
+  document.getElementById('r30-plot-count').textContent = '0';
+  document.getElementById('r30-feedback').classList.add('hidden');
+  document.getElementById('r30-summary').innerHTML = '';
+
+  beep3030Start();
+  t30 = setInterval(tick30, 1000);
+}
+
+function tick30() {
+  timeLeft--;
+
+  // Countdown beeps
+  if (timeLeft <= 3 && timeLeft > 0) beepCountdown();
+
+  update30Timer();
+
+  if (timeLeft <= 0) {
+    if (isRun) {
+      // Save rep
+      const r = S.runners[S.currentIdx];
+      r.repsData.push({ plots: plotsRep, walked: r.walkPen30[repIdx] || false });
+      isRun = false; timeLeft = 30;
+      beep3030Rest();
+      updateUI30(); buildReps(); updateSummary30();
+    } else {
+      repIdx++;
+      if (repIdx >= S.reps3030) {
+        clearInterval(t30); t30 = null;
+        beepEnd();
+        setTimeout(() => showResults(), 300);
+        return;
+      }
+      isRun = true; timeLeft = 30; plotsRep = 0;
+      document.getElementById('r30-plot-count').textContent = '0';
+      document.getElementById('r30-feedback').classList.add('hidden');
+      beep3030Start();
+      updateUI30(); buildReps();
+    }
+  }
+}
+
+function update30Timer() {
+  const d = document.getElementById('r30-timer');
+  d.textContent = '00:' + String(timeLeft).padStart(2,'0');
+  if (timeLeft <= 5 && timeLeft > 0) d.style.color = isRun ? 'var(--warning)' : 'var(--blue)';
+  else d.style.color = 'var(--text)';
+}
+
+function updateUI30() {
+  const ph = document.getElementById('r30-phase');
+  const lb = document.getElementById('r30-timer-label');
+  if (isRun) {
+    ph.textContent = '🏃 COURSE'; ph.className = 'phase-indicator phase-run';
+    lb.textContent = `30/30 — COURSE (Rép. ${repIdx+1}/${S.reps3030})`;
+    document.getElementById('r30-btn-plot').disabled = false;
+    document.getElementById('r30-btn-walk').disabled = false;
+  } else {
+    ph.textContent = '⏸️ RÉCUPÉRATION'; ph.className = 'phase-indicator phase-rest';
+    lb.textContent = `30/30 — REPOS`;
+    document.getElementById('r30-btn-plot').disabled = true;
+    document.getElementById('r30-btn-walk').disabled = true;
+  }
+}
+
+function buildReps() {
+  const r = S.runners[S.currentIdx];
+  const c = document.getElementById('r30-reps');
+  c.innerHTML = '';
+  for (let i = 0; i < S.reps3030; i++) {
+    const d = document.createElement('div');
+    d.className = 'rep-item';
+    if (i < r.repsData.length) {
+      const rd = r.repsData[i];
+      const ok = rd.plots >= r.contract30 && !rd.walked;
+      d.classList.add(ok ? 'done-ok' : 'done-fail');
+      d.textContent = rd.plots;
+    } else if (i === repIdx && isRun) {
+      d.classList.add('current'); d.textContent = plotsRep || (i+1);
+    } else if (i === repIdx && !isRun) {
+      d.classList.add('rest'); d.textContent = '⏸';
+    } else {
+      d.textContent = i+1;
+    }
+    c.appendChild(d);
+  }
+}
+
+function recordPlot30() {
+  if (!isRun) return;
+  plotsRep++;
+  document.getElementById('r30-plot-count').textContent = plotsRep;
+  beep(900, 0.06, 0.15);
+  updateFeedback30();
+  // Update current rep display
+  const cur = document.querySelector('.rep-item.current');
+  if (cur) cur.textContent = plotsRep;
+}
+
+function recordWalk30() {
+  if (!isRun) return;
+  const r = S.runners[S.currentIdx];
+  r.walkPen30[repIdx] = true;
+  beep(300, 0.2, 0.3);
+  document.getElementById('r30-phase').textContent = '🚶 MARCHE';
+  document.getElementById('r30-phase').className = 'phase-indicator phase-walk';
+  setTimeout(() => { if (isRun) { document.getElementById('r30-phase').textContent = '🏃 COURSE'; document.getElementById('r30-phase').className = 'phase-indicator phase-run'; } }, 2000);
+}
+
+function updateFeedback30() {
+  const r = S.runners[S.currentIdx];
+  const tgt = r.contract30;
+  const timeInRep = 30 - timeLeft;
+  if (timeInRep <= 2) { document.getElementById('r30-feedback').classList.add('hidden'); return; }
+  const expected = (timeInRep / 30) * tgt;
+  const diff = plotsRep - expected;
+  const fb = document.getElementById('r30-feedback');
+  fb.classList.remove('hidden');
+  if (diff > 0.5) { fb.className = 'speed-feedback speed-fast'; fb.textContent = '⚡ En avance'; }
+  else if (diff < -0.5) { fb.className = 'speed-feedback speed-slow'; fb.textContent = '⚠️ En retard !'; }
+  else { fb.className = 'speed-feedback speed-ok'; fb.textContent = '✅ Cible !'; }
+}
+
+function updateSummary30() {
+  const r = S.runners[S.currentIdx];
+  let h = '<div style="font-size:0.78rem;color:var(--text-dim);margin-bottom:4px;">Récap :</div>';
+  r.repsData.forEach((rd, i) => {
+    const ok = rd.plots >= r.contract30 && !rd.walked;
+    h += `<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:0.82rem;">
+      <span>Rép ${i+1}</span>
+      <span>${rd.plots} plots ${rd.walked?'<span class="badge badge-red">marche</span>':''} ${ok?'<span class="badge badge-green">✓</span>':'<span class="badge badge-red">✗</span>'}</span>
+    </div>`;
+  });
+  document.getElementById('r30-summary').innerHTML = h;
+}
+
+// =========================================
+// RESULTS
+// =========================================
+function showResults() {
+  const r = S.runners[S.currentIdx];
+  showScreen('screen-results');
+  document.getElementById('res-runner-name').textContent = r.name;
+
+  const allureNames = {green:'🟢 Verte (VMA-3)', yellow:'🟡 Jaune (VMA-2)', orange:'🟠 Orange (VMA-1)'};
+  document.getElementById('res-allure').textContent = allureNames[r.allure];
+  document.getElementById('res-speed').textContent = r.tSpeed + ' km/h';
+
+  const totalPlots = r.grid.reduce((a,b) => a+b, 0);
+  document.getElementById('res-plots-total').textContent = totalPlots;
+
+  // Sorties 12min
+  let sorties12 = 0;
+  const tgt = Math.floor(r.plotTarget90);
+  for (let c = 0; c < 8; c++) {
+    if (r.skippedCols.includes(c+1)) continue;
+    const def = tgt - r.grid[c];
+    if (def > 0) sorties12 += def;
+  }
+  document.getElementById('res-sorties').textContent = sorties12;
+
+  const walkPen = r.walkPen12.filter(Boolean).length;
+  document.getElementById('res-penalties').textContent = walkPen;
+
+  // 30/30
+  let sorties30 = 0, repsOk = 0;
+  r.repsData.forEach(rd => {
+    const ok = rd.plots >= r.contract30 && !rd.walked;
+    if (ok) repsOk++;
+    else {
+      // Each failed rep = deficit in plots counts as sortie
+      const deficit = Math.max(0, Math.ceil(r.contract30) - rd.plots);
+      sorties30 += Math.max(1, deficit); // au moins 1 sortie par rep ratée
+      if (rd.walked) sorties30++; // marche = pénalité supplémentaire
+    }
+  });
+
+  // Rattrapages
+  let rattrapages = 0;
+  if (repsOk > 4) rattrapages = Math.min(repsOk - 4, 3);
+
+  const totalSorties = Math.max(0, sorties12 + walkPen + sorties30 - rattrapages);
+
+  document.getElementById('res-contract-30').textContent = r.contract30 + ' plots/30"';
+  document.getElementById('res-reps-ok').textContent = repsOk + ' / ' + S.reps3030;
+  document.getElementById('res-sorties-30').textContent = sorties30;
+  document.getElementById('res-rattrapages').textContent = rattrapages > 0 ? '-' + rattrapages : '0';
+  document.getElementById('res-total-sorties').textContent = totalSorties;
+
+  const d1Reg = sortiesScore(totalSorties);
+  const d1Vma = vmaScore(r.vma, r.gender);
+  document.getElementById('res-d1-reg').textContent = d1Reg + ' / 8';
+  document.getElementById('res-d1-vma').textContent = d1Vma + ' / 4';
+  document.getElementById('res-d1-total').textContent = (d1Reg + d1Vma) + ' / 12';
+
+  r.results = { totalPlots, sorties12, walkPen, sorties30, repsOk, rattrapages, totalSorties, d1Reg, d1Vma, d1Total: d1Reg + d1Vma };
+
+  S.completedRunners++;
+  const nextBtn = document.getElementById('res-next-btn');
+  const finalBtn = document.getElementById('res-final-btn');
+  if (S.completedRunners < 2) {
+    nextBtn.classList.remove('hidden');
+    nextBtn.textContent = `▶️ Suivant : ${S.runners[S.order[1]].name}`;
+    finalBtn.classList.add('hidden');
+  } else {
+    nextBtn.classList.add('hidden');
+    finalBtn.classList.remove('hidden');
+  }
+}
+
+function nextRunner() {
+  S.currentIdx = S.order[1];
+  launch12();
+}
+
+function showFinalScreen() {
+  showScreen('screen-final');
+  let h = '';
+  S.runners.forEach(r => {
+    if (!r.results) return;
+    h += `<div class="card">
+      <div class="card-title">👤 ${r.name}</div>
+      <div class="result-row"><span class="label">VMA</span><span class="value">${r.vma} km/h (${r.gender==='F'?'Fille':'Garçon'})</span></div>
+      <div class="result-row"><span class="label">Allure cible</span><span class="value">${r.tSpeed} km/h</span></div>
+      <div class="result-row"><span class="label">Sorties totales</span><span class="value">${r.results.totalSorties}</span></div>
+      <div class="result-row"><span class="label">Régularité</span><span class="value">${r.results.d1Reg} / 8</span></div>
+      <div class="result-row"><span class="label">VMA</span><span class="value">${r.results.d1Vma} / 4</span></div>
+      <div class="big-score">${r.results.d1Total} / 12</div>
+    </div>`;
+  });
+  document.getElementById('final-results').innerHTML = h;
+}
+
+// =========================================
+// NAV
+// =========================================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function resetApp() {
+  if (t12) { clearInterval(t12); t12 = null; }
+  if (t30) { clearInterval(t30); t30 = null; }
+  showScreen('screen-config');
+}
+
+// =========================================
+// SERVICE WORKER
+// =========================================
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => {
+        console.log('[App] SW registered:', reg.scope);
+        // Auto-update
+        reg.addEventListener('updatefound', () => {
+          const newSW = reg.installing;
+          newSW.addEventListener('statechange', () => {
+            if (newSW.state === 'activated') {
+              console.log('[App] New SW activated, reloading...');
+              // Don't auto-reload during a race
+              if (!t12 && !t30) location.reload();
+            }
+          });
+        });
+      })
+      .catch(err => console.warn('[App] SW failed:', err));
+  });
+}
+
+// Wake lock
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      await navigator.wakeLock.request('screen');
+    }
+  } catch(e) {}
+}
+requestWakeLock();
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') requestWakeLock();
+});
+
+// Init
+for (let r = 1; r <= 2; r++) selectAllure(r, 'green');
+</script>
+
+</body>
+</html>
