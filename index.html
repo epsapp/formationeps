@@ -12,6 +12,8 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-96x96.png">
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 <title>Course 12' + 30/30</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap');
@@ -251,14 +253,85 @@ html, body {
 .pulsing { animation:pulse 1s infinite; }
 
 @media(min-width:600px) { .screen { max-width:500px; margin:0 auto; } }
+
+/* ====== HOME SCREEN ====== */
+.home-hero { text-align:center; padding:30px 0 16px; }
+.home-hero h1 { font-size:2rem; font-weight:900; background:linear-gradient(135deg,var(--accent),var(--blue)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.home-hero p { color:var(--text-dim); margin-top:6px; font-size:0.9rem; }
+.mode-cards { display:flex; flex-direction:column; gap:12px; margin-top:10px; }
+.mode-card { background:var(--bg2); border-radius:16px; padding:22px; border:2px solid transparent; cursor:pointer; transition:all 0.2s; text-align:center; }
+.mode-card:active { transform:scale(0.97); }
+.mode-card-icon { font-size:2.5rem; margin-bottom:8px; }
+.mode-card h2 { font-size:1.15rem; font-weight:700; margin-bottom:4px; }
+.mode-card p { font-size:0.82rem; color:var(--text-dim); line-height:1.4; }
+.mode-card-prof { border-color:rgba(77,171,247,0.35); background:rgba(77,171,247,0.05); }
+.mode-card-eleve { border-color:rgba(0,212,170,0.35); background:rgba(0,212,170,0.05); }
+
+/* ====== PROF MODE ====== */
+.student-item { display:flex; align-items:center; gap:8px; padding:10px 12px; background:var(--bg3); border-radius:10px; margin-bottom:8px; }
+.student-item .sname { flex:1; font-weight:600; font-size:0.9rem; }
+.student-item .sbadge { font-size:0.7rem; padding:2px 7px; border-radius:6px; background:rgba(0,212,170,0.15); color:var(--accent); white-space:nowrap; }
+.student-item .sicons { display:flex; gap:4px; flex-shrink:0; }
+.student-item .sicons button { padding:5px 9px; border:none; border-radius:7px; background:var(--bg2); color:var(--text); cursor:pointer; font-size:0.85rem; border:1px solid rgba(255,255,255,0.07); }
+
+/* ====== QR DISPLAY ====== */
+.qr-wrap { background:#fff; border-radius:14px; padding:16px; margin:12px auto; width:fit-content; display:block; }
+.qr-info { text-align:center; color:var(--text-dim); font-size:0.82rem; margin-top:10px; }
+
+/* ====== SCANNER ====== */
+.scanner-wrap { position:relative; border-radius:12px; overflow:hidden; background:#000; margin:8px 0; max-height:300px; }
+.scanner-wrap video { width:100%; display:block; max-height:300px; object-fit:cover; }
+.scanner-overlay { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:180px; height:180px; border:3px solid var(--accent); border-radius:12px; box-shadow:0 0 0 9999px rgba(0,0,0,0.55); pointer-events:none; }
+
+/* ====== RESULTS TABLE ====== */
+.results-table { width:100%; border-collapse:collapse; font-size:0.75rem; margin:6px 0; }
+.results-table th { background:var(--bg3); padding:6px 5px; text-align:left; font-size:0.65rem; color:var(--text-dim); font-weight:700; text-transform:uppercase; letter-spacing:0.5px; white-space:nowrap; }
+.results-table td { padding:6px 5px; border-bottom:1px solid rgba(255,255,255,0.05); }
+.results-table tr:nth-child(even) td { background:rgba(255,255,255,0.02); }
+.score-cell { font-family:'JetBrains Mono',monospace; font-weight:700; color:var(--accent); }
+
+/* ====== STUDENT MODE ====== */
+body.student-mode #card-c2 { display:none !important; }
+body.student-mode .start-btns-classic { display:none !important; }
+body.student-mode .start-btn-eleve { display:flex !important; }
+.start-btn-eleve { display:none !important; }
+.student-badge { background:rgba(0,212,170,0.1); border:1px solid rgba(0,212,170,0.3); border-radius:10px; padding:9px 14px; text-align:center; margin-bottom:12px; color:var(--accent); font-weight:600; font-size:0.88rem; }
 </style>
 </head>
 <body>
 
 <div class="beep-indicator" id="beep-flash"></div>
 
+<!-- ====== SCREEN: HOME ====== -->
+<div id="screen-home" class="screen active">
+  <div class="home-hero">
+    <div style="font-size:3rem;">🏃</div>
+    <h1>Course 12' + 30/30</h1>
+    <p>Application EPS — Épreuve finale</p>
+  </div>
+
+  <div class="mode-cards">
+    <div class="mode-card mode-card-prof" onclick="enterProfMode()">
+      <div class="mode-card-icon">👨‍🏫</div>
+      <h2>Mode Professeur</h2>
+      <p>Créez les QR codes élèves, collectez et exportez les résultats de la classe</p>
+    </div>
+    <div class="mode-card mode-card-eleve" onclick="enterEleveMode()">
+      <div class="mode-card-icon">🏃</div>
+      <h2>Mode Élève</h2>
+      <p>Scannez votre QR code ou saisissez vos informations pour démarrer l'épreuve</p>
+    </div>
+  </div>
+
+  <div style="text-align:center; margin-top:20px;">
+    <button class="btn btn-secondary" onclick="appMode='classic';showScreen('screen-config');" style="width:auto;padding:8px 22px;font-size:0.83rem;opacity:0.55;">
+      ⚙️ Mode classique (2 coureurs, même appareil)
+    </button>
+  </div>
+</div>
+
 <!-- ====== SCREEN: CONFIG ====== -->
-<div id="screen-config" class="screen active">
+<div id="screen-config" class="screen">
   <div class="app-header">
     <h1>🏃 Course 12' + 30/30</h1>
     <p>Épreuve finale — Paramétrage</p>
@@ -375,12 +448,18 @@ html, body {
     </div>
   </div>
 
-  <button class="btn btn-primary btn-large" onclick="startRace(1)" style="margin-top:10px;">
-    ▶️ Coureur 1 court en premier
+  <div class="start-btns-classic">
+    <button class="btn btn-primary btn-large" onclick="startRace(1)" style="margin-top:10px;">
+      ▶️ Coureur 1 court en premier
+    </button>
+    <button class="btn btn-secondary btn-large" onclick="startRace(2)" style="margin-top:6px;">
+      ▶️ Coureur 2 court en premier
+    </button>
+  </div>
+  <button class="btn btn-primary btn-large start-btn-eleve" onclick="startRace(1)" style="margin-top:10px;">
+    ▶️ Démarrer l'épreuve
   </button>
-  <button class="btn btn-secondary btn-large" onclick="startRace(2)" style="margin-top:6px;">
-    ▶️ Coureur 2 court en premier
-  </button>
+  <button class="btn btn-secondary" onclick="showScreen('screen-home')" style="margin-top:8px;opacity:0.6;">← Retour</button>
 </div>
 
 <!-- ====== SCREEN: 12 MIN ====== -->
@@ -551,7 +630,17 @@ html, body {
   <button class="btn btn-secondary btn-large" onclick="showFinalScreen()" id="res-final-btn" class="hidden" style="margin-top:6px;">
     📊 Voir résultats finaux
   </button>
-  <button class="btn btn-secondary btn-large" onclick="resetApp()" style="margin-top:6px;">🔄 Recommencer</button>
+  <button class="btn btn-secondary btn-large" onclick="resetApp()" style="margin-top:6px;" id="res-reset-btn">🔄 Recommencer</button>
+
+  <!-- QR résultat élève (visible en mode élève uniquement) -->
+  <div id="eleve-result-qr" class="card hidden" style="margin-top:14px;">
+    <div class="card-title">📱 Votre QR résultat</div>
+    <p class="info-text" style="margin-bottom:12px;">Montrez ce QR code à votre professeur — il le scannera pour enregistrer votre résultat</p>
+    <div class="qr-wrap" style="margin:0 auto;">
+      <canvas id="eleve-result-canvas"></canvas>
+    </div>
+    <p class="info-text" style="margin-top:10px;text-align:center;">✅ Résultat prêt à être enregistré</p>
+  </div>
 </div>
 
 <!-- ====== SCREEN: FINAL ====== -->
@@ -561,6 +650,174 @@ html, body {
   </div>
   <div id="final-results"></div>
   <button class="btn btn-secondary btn-large" onclick="resetApp()" style="margin-top:14px;">🔄 Nouvelle épreuve</button>
+</div>
+
+<!-- ====== SCREEN: PROF CLASS ====== -->
+<div id="screen-prof-class" class="screen">
+  <div class="app-header">
+    <h1>👨‍🏫 Mode Professeur</h1>
+    <p>Gestion de la classe</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">⚙️ Paramètres piste (pour tous les élèves)</div>
+    <div class="row">
+      <div class="form-group">
+        <label>Distance plots (m)</label>
+        <input type="number" id="prof-plot-dist" value="20" min="5" max="100" step="5">
+      </div>
+      <div class="form-group">
+        <label>Longueur piste (m)</label>
+        <input type="number" id="prof-track-length" value="200" min="50" max="500" step="10">
+      </div>
+      <div class="form-group">
+        <label>Rép. 30/30</label>
+        <select id="prof-reps">
+          <option value="4">4</option><option value="5">5</option>
+          <option value="6" selected>6</option><option value="7">7</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">➕ Ajouter un élève</div>
+    <div class="row">
+      <div class="form-group" style="flex:2">
+        <label>Nom complet</label>
+        <input type="text" id="new-student-name" placeholder="Prénom Nom">
+      </div>
+      <div class="form-group">
+        <label>VMA</label>
+        <select id="new-student-vma">
+          <option value="8">8</option><option value="9">9</option>
+          <option value="10">10</option><option value="11">11</option>
+          <option value="12" selected>12</option><option value="13">13</option>
+          <option value="14">14</option><option value="15">15</option>
+          <option value="16">16</option><option value="17">17</option>
+          <option value="18">18</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Sexe</label>
+        <select id="new-student-gender">
+          <option value="F">F</option><option value="G">G</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Allure</label>
+        <select id="new-student-allure">
+          <option value="green">🟢 Verte</option>
+          <option value="yellow">🟡 Jaune</option>
+          <option value="orange">🟠 Orange</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="addStudent()" style="margin-top:8px;">➕ Ajouter l'élève</button>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <div class="card-title" style="margin:0;">📋 Élèves (<span id="student-count">0</span>)</div>
+      <button class="btn btn-secondary" onclick="showAllQRs()" style="width:auto;padding:6px 12px;font-size:0.8rem;" id="btn-show-qrs">📱 Tous les QR</button>
+    </div>
+    <div id="student-list">
+      <p style="color:var(--text-dim);font-size:0.82rem;text-align:center;padding:14px;">Aucun élève ajouté</p>
+    </div>
+  </div>
+
+  <div class="action-row">
+    <button class="btn btn-primary" onclick="showProfResults()">📊 Voir résultats</button>
+    <button class="btn btn-secondary" onclick="showScreen('screen-home')">← Accueil</button>
+  </div>
+</div>
+
+<!-- ====== SCREEN: PROF QR DISPLAY ====== -->
+<div id="screen-prof-qr" class="screen">
+  <div class="app-header">
+    <h1>📱 QR Élève</h1>
+    <p id="prof-qr-student-name" style="font-weight:600;font-size:1rem;"></p>
+  </div>
+
+  <div class="card" style="text-align:center;">
+    <p class="info-text" style="margin-bottom:14px;">L'élève scanne ce QR avec son téléphone pour démarrer l'épreuve pré-configurée</p>
+    <div class="qr-wrap" id="prof-qr-wrap" style="margin:0 auto;">
+      <canvas id="prof-qr-canvas"></canvas>
+    </div>
+    <div class="qr-info" id="prof-qr-info"></div>
+  </div>
+
+  <div class="action-row" style="margin-top:12px;">
+    <button class="btn btn-secondary" id="prof-qr-prev" onclick="showStudentQR(currentQRIdx - 1)">← Préc.</button>
+    <button class="btn btn-secondary" id="prof-qr-next" onclick="showStudentQR(currentQRIdx + 1)">Suiv. →</button>
+  </div>
+  <button class="btn btn-secondary" onclick="showScreen('screen-prof-class')" style="margin-top:8px;">← Retour classe</button>
+</div>
+
+<!-- ====== SCREEN: PROF SCAN ====== -->
+<div id="screen-prof-scan" class="screen">
+  <div class="app-header">
+    <h1>📷 Scanner résultats</h1>
+    <p>Scannez le QR résultat de chaque élève</p>
+  </div>
+
+  <div class="card">
+    <div class="scanner-wrap" id="scanner-wrap">
+      <video id="scanner-video" autoplay playsinline muted></video>
+      <canvas id="scanner-canvas" style="display:none;"></canvas>
+      <div class="scanner-overlay"></div>
+    </div>
+    <div id="scanner-status" style="text-align:center;font-size:0.85rem;color:var(--text-dim);margin-top:10px;padding:4px;">
+      📷 Pointez la caméra vers le QR résultat
+    </div>
+  </div>
+
+  <div id="scan-result-preview" class="card hidden">
+    <div class="card-title">✅ Résultat détecté</div>
+    <div id="scan-result-content"></div>
+    <div class="action-row" style="margin-top:10px;">
+      <button class="btn btn-primary" onclick="confirmScanResult()">✅ Enregistrer</button>
+      <button class="btn btn-secondary" onclick="resumeScanner()">↩️ Rescanner</button>
+    </div>
+  </div>
+
+  <div class="action-row" style="margin-top:8px;">
+    <button class="btn btn-primary" onclick="stopScanner();showProfResults();">📊 Voir résultats</button>
+    <button class="btn btn-secondary" onclick="stopScanner();showScreen('screen-prof-class');">← Retour</button>
+  </div>
+</div>
+
+<!-- ====== SCREEN: PROF RESULTS ====== -->
+<div id="screen-prof-results" class="screen">
+  <div class="app-header">
+    <h1>📊 Résultats classe</h1>
+    <p id="prof-results-count"></p>
+  </div>
+
+  <div class="card" style="padding:10px;">
+    <div style="overflow-x:auto;">
+      <table class="results-table" id="prof-results-table">
+        <thead>
+          <tr>
+            <th>Nom</th><th>VMA</th><th>All.</th><th>Plots 12'</th>
+            <th>Sort.</th><th>30/30</th><th>Rég/8</th><th>VMA/4</th><th>D1/12</th>
+          </tr>
+        </thead>
+        <tbody id="prof-results-body">
+          <tr><td colspan="9" style="text-align:center;color:var(--text-dim);padding:20px;">Aucun résultat collecté</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="action-row">
+    <button class="btn btn-primary" onclick="exportCSV()">⬇️ Exporter CSV</button>
+    <button class="btn btn-secondary" onclick="startScanner();showScreen('screen-prof-scan');">📷 Scanner QR</button>
+  </div>
+  <div class="action-row" style="margin-top:6px;">
+    <button class="btn btn-secondary" onclick="showScreen('screen-prof-class')">← Retour classe</button>
+    <button class="btn btn-danger" onclick="clearProfResults()" style="flex:0.6;">🗑️ Effacer</button>
+  </div>
 </div>
 
 
@@ -1141,9 +1398,17 @@ function showResults() {
   r.results = { totalPlots, sorties12, walkPen, sorties30, repsOk, rattrapages, totalSorties, d1Reg, d1Vma, d1Total: d1Reg + d1Vma };
 
   S.completedRunners++;
-  const nextBtn = document.getElementById('res-next-btn');
+  const nextBtn  = document.getElementById('res-next-btn');
   const finalBtn = document.getElementById('res-final-btn');
-  if (S.completedRunners < 2) {
+  const resetBtn = document.getElementById('res-reset-btn');
+
+  if (appMode === 'eleve') {
+    // Student mode: hide navigation buttons, show result QR
+    nextBtn.classList.add('hidden');
+    finalBtn.classList.add('hidden');
+    if (resetBtn) resetBtn.classList.add('hidden');
+    showEleveResultQR();
+  } else if (S.completedRunners < 2) {
     nextBtn.classList.remove('hidden');
     nextBtn.textContent = `▶️ Suivant : ${S.runners[S.order[1]].name}`;
     finalBtn.classList.add('hidden');
@@ -1188,7 +1453,12 @@ function showScreen(id) {
 function resetApp() {
   if (t12) { clearInterval(t12); t12 = null; }
   if (t30) { clearInterval(t30); t30 = null; }
-  showScreen('screen-config');
+  document.body.classList.remove('student-mode');
+  appMode = 'classic';
+  // Remove student badge if present
+  const badge = document.getElementById('student-mode-badge');
+  if (badge) badge.remove();
+  showScreen('screen-home');
 }
 
 // =========================================
@@ -1230,6 +1500,388 @@ document.addEventListener('visibilitychange', () => {
 
 // Init
 for (let r = 1; r <= 2; r++) selectAllure(r, 'green');
+
+// =========================================
+// MODE MANAGEMENT
+// =========================================
+let appMode = 'classic'; // 'classic' | 'prof' | 'eleve'
+let profClass = [];
+let profResults = [];
+let currentQRIdx = 0;
+let pendingScanResult = null;
+let scannerStream = null;
+let scanAnimFrame = null;
+
+function loadProfData() {
+  try {
+    profClass = JSON.parse(localStorage.getItem('profClass') || '[]');
+    profResults = JSON.parse(localStorage.getItem('profResults') || '[]');
+  } catch(e) { profClass = []; profResults = []; }
+}
+
+function saveProfData() {
+  localStorage.setItem('profClass', JSON.stringify(profClass));
+  localStorage.setItem('profResults', JSON.stringify(profResults));
+}
+
+function enterProfMode() {
+  appMode = 'prof';
+  loadProfData();
+  renderStudentList();
+  showScreen('screen-prof-class');
+}
+
+function enterEleveMode() {
+  appMode = 'eleve';
+  document.body.classList.add('student-mode');
+  const badge = document.getElementById('student-mode-badge');
+  if (badge) badge.classList.remove('hidden');
+  showScreen('screen-config');
+}
+
+// =========================================
+// URL PARAMS (QR scan -> student mode)
+// =========================================
+function checkURLParams() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('mode') !== 'eleve') return;
+
+  appMode = 'eleve';
+  document.body.classList.add('student-mode');
+
+  const name   = params.get('n') || '';
+  const vma    = params.get('v') || '12';
+  const gender = params.get('g') || 'F';
+  const allure = params.get('a') || 'green';
+  const dist   = params.get('d') || '20';
+  const track  = params.get('t') || '200';
+  const reps   = params.get('r') || '6';
+
+  document.getElementById('c1-name').value = name;
+  document.getElementById('c1-vma').value = vma;
+  document.getElementById('c1-gender').value = gender;
+  selectAllure(1, allure);
+  document.getElementById('cfg-plot-dist').value = dist;
+  document.getElementById('cfg-track-length').value = track;
+  document.getElementById('cfg-reps').value = reps;
+
+  // Insert student badge at top of config screen
+  const configScreen = document.getElementById('screen-config');
+  const badge = document.createElement('div');
+  badge.className = 'student-badge';
+  badge.id = 'student-mode-badge';
+  badge.innerHTML = `🏃 Mode Élève${name ? ' — <strong>' + name + '</strong>' : ''}`;
+  configScreen.insertBefore(badge, configScreen.children[0]);
+
+  showScreen('screen-config');
+}
+
+// =========================================
+// PROF CLASS MANAGEMENT
+// =========================================
+function addStudent() {
+  const name = document.getElementById('new-student-name').value.trim();
+  if (!name) { alert('Saisissez un nom'); return; }
+
+  profClass.push({
+    name,
+    vma:    parseInt(document.getElementById('new-student-vma').value),
+    gender: document.getElementById('new-student-gender').value,
+    allure: document.getElementById('new-student-allure').value,
+    dist:   parseInt(document.getElementById('prof-plot-dist').value) || 20,
+    track:  parseInt(document.getElementById('prof-track-length').value) || 200,
+    reps:   parseInt(document.getElementById('prof-reps').value) || 6,
+  });
+  saveProfData();
+  document.getElementById('new-student-name').value = '';
+  renderStudentList();
+}
+
+function removeStudent(idx) {
+  if (!confirm('Supprimer cet élève ?')) return;
+  profClass.splice(idx, 1);
+  saveProfData();
+  renderStudentList();
+}
+
+function renderStudentList() {
+  const container = document.getElementById('student-list');
+  const countEl   = document.getElementById('student-count');
+  if (countEl) countEl.textContent = profClass.length;
+
+  const qrBtn = document.getElementById('btn-show-qrs');
+  if (qrBtn) qrBtn.style.display = profClass.length ? '' : 'none';
+
+  if (!profClass.length) {
+    container.innerHTML = '<p style="color:var(--text-dim);font-size:0.82rem;text-align:center;padding:14px;">Aucun élève ajouté</p>';
+    return;
+  }
+
+  const allureIcons = { green:'🟢', yellow:'🟡', orange:'🟠' };
+  container.innerHTML = profClass.map((s, i) => `
+    <div class="student-item">
+      <div class="sname">${s.name}</div>
+      <span class="sbadge">VMA${s.vma} · ${s.gender} · ${allureIcons[s.allure]||''}${s.allure}</span>
+      <div class="sicons">
+        <button onclick="showStudentQR(${i})" title="Afficher QR code">📱</button>
+        <button onclick="removeStudent(${i})" title="Supprimer">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function showAllQRs() {
+  if (!profClass.length) { alert('Ajoutez des élèves d\'abord'); return; }
+  showStudentQR(0);
+}
+
+// =========================================
+// QR CODE GENERATION
+// =========================================
+function showStudentQR(idx) {
+  if (idx < 0 || idx >= profClass.length) return;
+  currentQRIdx = idx;
+  const s = profClass[idx];
+
+  showScreen('screen-prof-qr');
+  document.getElementById('prof-qr-student-name').textContent = s.name;
+  document.getElementById('prof-qr-info').textContent = `${idx + 1} / ${profClass.length} · VMA ${s.vma} · ${s.gender} · ${s.allure}`;
+  document.getElementById('prof-qr-prev').disabled = idx === 0;
+  document.getElementById('prof-qr-next').disabled = idx === profClass.length - 1;
+
+  const base = window.location.origin + window.location.pathname;
+  const url  = `${base}?mode=eleve&n=${encodeURIComponent(s.name)}&v=${s.vma}&g=${s.gender}&a=${s.allure}&d=${s.dist}&t=${s.track}&r=${s.reps}`;
+
+  const canvas = document.getElementById('prof-qr-canvas');
+  QRCode.toCanvas(canvas, url, { width: 240, margin: 2, color: { dark:'#000000', light:'#ffffff' } }, err => {
+    if (err) console.error('QR gen error:', err);
+  });
+}
+
+function generateEleveResultQR(r) {
+  const repsPlots   = r.repsData.map(rd => rd.plots).join(',');
+  const repsWalked  = r.repsData.map(rd => rd.walked ? 1 : 0).join(',');
+  const text = [
+    'EPS',
+    r.name, r.vma, r.gender, r.allure,
+    r.results.totalPlots, r.results.sorties12, r.results.walkPen,
+    repsPlots, repsWalked,
+    r.results.d1Total,
+    new Date().toLocaleDateString('fr-FR')
+  ].join('|');
+
+  const canvas = document.getElementById('eleve-result-canvas');
+  QRCode.toCanvas(canvas, text, { width: 220, margin: 2, color: { dark:'#000000', light:'#ffffff' } }, err => {
+    if (err) console.error('QR result error:', err);
+  });
+}
+
+// =========================================
+// QR SCANNER (teacher collects results)
+// =========================================
+function startScanner() {
+  const video  = document.getElementById('scanner-video');
+  const canvas = document.getElementById('scanner-canvas');
+  const status = document.getElementById('scanner-status');
+
+  document.getElementById('scan-result-preview').classList.add('hidden');
+  pendingScanResult = null;
+
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+    .then(stream => {
+      scannerStream = stream;
+      video.srcObject = stream;
+      video.play();
+      video.addEventListener('loadedmetadata', () => {
+        canvas.width  = video.videoWidth;
+        canvas.height = video.videoHeight;
+        scanFrame();
+      }, { once: true });
+      status.textContent = '📷 Pointez la caméra vers le QR résultat';
+    })
+    .catch(() => {
+      status.textContent = '⚠️ Accès caméra refusé — vérifiez les permissions';
+    });
+}
+
+function scanFrame() {
+  const video  = document.getElementById('scanner-video');
+  const canvas = document.getElementById('scanner-canvas');
+  if (!video || !canvas || !scannerStream) return;
+
+  if (video.readyState === video.HAVE_ENOUGH_DATA) {
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const code = jsQR(imageData.data, imageData.width, imageData.height);
+    if (code && code.data.startsWith('EPS|')) {
+      parseAndPreviewResult(code.data);
+      return; // Pause scanning — wait for confirm/rescan
+    }
+  }
+  scanAnimFrame = requestAnimationFrame(scanFrame);
+}
+
+function stopScanner() {
+  if (scanAnimFrame)  { cancelAnimationFrame(scanAnimFrame); scanAnimFrame = null; }
+  if (scannerStream)  { scannerStream.getTracks().forEach(t => t.stop()); scannerStream = null; }
+}
+
+function resumeScanner() {
+  document.getElementById('scan-result-preview').classList.add('hidden');
+  pendingScanResult = null;
+  scanFrame();
+}
+
+function parseAndPreviewResult(data) {
+  // Format: EPS|name|vma|gender|allure|plots12|sorties12|walkPen|repsPlots|repsWalked|d1Total|date
+  const p = data.split('|');
+  if (p.length < 11 || p[0] !== 'EPS') return;
+
+  const result = {
+    name:       p[1],
+    vma:        parseInt(p[2]),
+    gender:     p[3],
+    allure:     p[4],
+    totalPlots: parseInt(p[5]),
+    sorties12:  parseInt(p[6]),
+    walkPen:    parseInt(p[7]),
+    repsPlots:  p[8].split(',').map(Number),
+    repsWalked: p[9].split(',').map(Number),
+    d1Total:    parseFloat(p[10]),
+    date:       p[11] || new Date().toLocaleDateString('fr-FR'),
+  };
+  result.d1Reg  = sortiesScore(result.sorties12);
+  result.d1Vma  = vmaScore(result.vma, result.gender);
+  result.repsOk = result.repsPlots.filter((pl, i) => pl >= contract3030(result.vma) && !result.repsWalked[i]).length;
+
+  pendingScanResult = result;
+
+  const allureNames = { green:'🟢 Verte', yellow:'🟡 Jaune', orange:'🟠 Orange' };
+  document.getElementById('scan-result-content').innerHTML = `
+    <div class="result-row"><span class="label">Élève</span><span class="value">${result.name}</span></div>
+    <div class="result-row"><span class="label">VMA / Allure</span><span class="value">${result.vma} km/h · ${allureNames[result.allure]||result.allure}</span></div>
+    <div class="result-row"><span class="label">Plots 12'</span><span class="value">${result.totalPlots}</span></div>
+    <div class="result-row"><span class="label">Score D1</span><span class="value" style="color:var(--accent);font-size:1.1rem;">${result.d1Total} / 12</span></div>
+  `;
+  document.getElementById('scan-result-preview').classList.remove('hidden');
+  document.getElementById('scanner-status').textContent = '✅ QR détecté — confirmez ou rescannez';
+}
+
+function confirmScanResult() {
+  if (!pendingScanResult) return;
+  const existing = profResults.findIndex(r => r.name === pendingScanResult.name);
+  if (existing >= 0) {
+    if (!confirm(`${pendingScanResult.name} a déjà un résultat. Remplacer ?`)) {
+      resumeScanner();
+      return;
+    }
+    profResults[existing] = pendingScanResult;
+  } else {
+    profResults.push(pendingScanResult);
+  }
+  saveProfData();
+  const name = pendingScanResult.name;
+  pendingScanResult = null;
+  document.getElementById('scan-result-preview').classList.add('hidden');
+  document.getElementById('scanner-status').textContent = `✅ ${name} enregistré !`;
+  setTimeout(() => {
+    document.getElementById('scanner-status').textContent = '📷 Pointez la caméra vers le QR résultat';
+    scanFrame();
+  }, 1800);
+}
+
+// =========================================
+// PROF RESULTS VIEW
+// =========================================
+function showProfResults() {
+  loadProfData();
+  renderProfResults();
+  showScreen('screen-prof-results');
+}
+
+function renderProfResults() {
+  const tbody  = document.getElementById('prof-results-body');
+  const countEl = document.getElementById('prof-results-count');
+  if (countEl) countEl.textContent = `${profResults.length} résultat(s) collecté(s)`;
+
+  if (!profResults.length) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-dim);padding:20px;">Aucun résultat — scannez les QR des élèves</td></tr>';
+    return;
+  }
+
+  const allureShort = { green:'🟢', yellow:'🟡', orange:'🟠' };
+  tbody.innerHTML = profResults.map(r => `
+    <tr>
+      <td>${r.name}</td>
+      <td>${r.vma}</td>
+      <td>${allureShort[r.allure] || r.allure}</td>
+      <td>${r.totalPlots}</td>
+      <td>${r.sorties12 + (r.walkPen || 0)}</td>
+      <td>${r.repsOk || 0}/${r.repsPlots ? r.repsPlots.length : 6}</td>
+      <td>${r.d1Reg}</td>
+      <td>${r.d1Vma}</td>
+      <td class="score-cell">${r.d1Total}</td>
+    </tr>
+  `).join('');
+}
+
+function clearProfResults() {
+  if (!confirm('Effacer tous les résultats collectés ?')) return;
+  profResults = [];
+  saveProfData();
+  renderProfResults();
+}
+
+// =========================================
+// CSV EXPORT
+// =========================================
+function exportCSV() {
+  loadProfData();
+  if (!profResults.length) { alert('Aucun résultat à exporter'); return; }
+
+  const headers = [
+    'Nom','VMA','Sexe','Allure',
+    'Plots 12min','Sorties 12min','Penalites marche',
+    'Reps OK','Reps plots (detail)',
+    'Score regularite /8','Score VMA /4','Total D1 /12','Date'
+  ];
+
+  const rows = profResults.map(r => [
+    r.name, r.vma, r.gender === 'G' ? 'Garçon' : 'Fille', r.allure,
+    r.totalPlots, r.sorties12, r.walkPen || 0,
+    r.repsOk || 0, (r.repsPlots || []).join('-'),
+    r.d1Reg, r.d1Vma, r.d1Total,
+    r.date || ''
+  ]);
+
+  const csv = [headers, ...rows]
+    .map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
+    .join('\n');
+
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `resultats_eps_${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// =========================================
+// STUDENT RESULT QR (shown after test)
+// =========================================
+function showEleveResultQR() {
+  const r = S.runners[S.currentIdx];
+  if (!r || !r.results) return;
+  document.getElementById('eleve-result-qr').classList.remove('hidden');
+  generateEleveResultQR(r);
+}
+
+// Check URL params on page load
+checkURLParams();
 </script>
 
 </body>
